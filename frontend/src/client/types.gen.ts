@@ -13,29 +13,6 @@ export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
 
-export type ItemCreate = {
-    title: string;
-    description?: (string | null);
-};
-
-export type ItemPublic = {
-    title: string;
-    description?: (string | null);
-    id: string;
-    owner_id: string;
-    created_at?: (string | null);
-};
-
-export type ItemsPublic = {
-    data: Array<ItemPublic>;
-    count: number;
-};
-
-export type ItemUpdate = {
-    title?: (string | null);
-    description?: (string | null);
-};
-
 export type Message = {
     message: string;
 };
@@ -50,6 +27,29 @@ export type PrivateUserCreate = {
     password: string;
     full_name: string;
     is_verified?: boolean;
+};
+
+export type RoomCreate = {
+    name: string;
+    max_number_of_people: number;
+};
+
+export type RoomPublic = {
+    name: string;
+    max_number_of_people: number;
+    id: string;
+    owner_id: string;
+    created_at?: (string | null);
+};
+
+export type RoomsPublic = {
+    data: Array<RoomPublic>;
+    count: number;
+};
+
+export type RoomUpdate = {
+    name?: (string | null);
+    max_number_of_people?: (number | null);
 };
 
 export type Token = {
@@ -113,38 +113,6 @@ export type ValidationError = {
     };
 };
 
-export type ItemsReadItemsData = {
-    limit?: number;
-    skip?: number;
-};
-
-export type ItemsReadItemsResponse = (ItemsPublic);
-
-export type ItemsCreateItemData = {
-    requestBody: ItemCreate;
-};
-
-export type ItemsCreateItemResponse = (ItemPublic);
-
-export type ItemsReadItemData = {
-    id: string;
-};
-
-export type ItemsReadItemResponse = (ItemPublic);
-
-export type ItemsUpdateItemData = {
-    id: string;
-    requestBody: ItemUpdate;
-};
-
-export type ItemsUpdateItemResponse = (ItemPublic);
-
-export type ItemsDeleteItemData = {
-    id: string;
-};
-
-export type ItemsDeleteItemResponse = (Message);
-
 export type LoginLoginAccessTokenData = {
     formData: Body_login_login_access_token;
 };
@@ -176,6 +144,38 @@ export type PrivateCreateUserData = {
 };
 
 export type PrivateCreateUserResponse = (UserPublic);
+
+export type RoomsReadRoomsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type RoomsReadRoomsResponse = (RoomsPublic);
+
+export type RoomsCreateRoomData = {
+    requestBody: RoomCreate;
+};
+
+export type RoomsCreateRoomResponse = (RoomPublic);
+
+export type RoomsReadRoomData = {
+    id: string;
+};
+
+export type RoomsReadRoomResponse = (RoomPublic);
+
+export type RoomsUpdateRoomData = {
+    id: string;
+    requestBody: RoomUpdate;
+};
+
+export type RoomsUpdateRoomResponse = (RoomPublic);
+
+export type RoomsDeleteRoomData = {
+    id: string;
+};
+
+export type RoomsDeleteRoomResponse = (Message);
 
 export type UsersReadUsersData = {
     limit?: number;

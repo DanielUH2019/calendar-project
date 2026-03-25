@@ -5,7 +5,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { type ItemPublic, ItemsService } from "@/client"
+import { type RoomPublic, RoomsService, type RoomUpdate } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -31,18 +31,21 @@ import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
 const formSchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }),
-  description: z.string().optional(),
+  name: z.string().min(1, { message: "Name is required" }),
+  max_number_of_people: z
+    .number()
+    .int()
+    .min(1, { message: "Must be at least 1" }),
 })
 
 type FormData = z.infer<typeof formSchema>
 
-interface EditItemProps {
-  item: ItemPublic
+interface EditRoomProps {
+  room: RoomPublic
   onSuccess: () => void
 }
 
-const EditItem = ({ item, onSuccess }: EditItemProps) => {
+const EditRoom = ({ room, onSuccess }: EditRoomProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -52,22 +55,22 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
     mode: "onBlur",
     criteriaMode: "all",
     defaultValues: {
-      title: item.title,
-      description: item.description ?? undefined,
+      name: room.name,
+      max_number_of_people: room.max_number_of_people,
     },
   })
 
   const mutation = useMutation({
-    mutationFn: (data: FormData) =>
-      ItemsService.updateItem({ id: item.id, requestBody: data }),
+    mutationFn: (data: RoomUpdate) =>
+      RoomsService.updateRoom({ id: room.id, requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("Item updated successfully")
+      showSuccessToast("Room updated successfully")
       setIsOpen(false)
       onSuccess()
     },
     onError: handleError.bind(showErrorToast),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["items"] })
+      queryClient.invalidateQueries({ queryKey: ["rooms"] })
     },
   })
 
@@ -82,28 +85,28 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
         onClick={() => setIsOpen(true)}
       >
         <Pencil />
-        Edit Item
+        Edit Room
       </DropdownMenuItem>
       <DialogContent className="sm:max-w-md">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <DialogHeader>
-              <DialogTitle>Edit Item</DialogTitle>
+              <DialogTitle>Edit Room</DialogTitle>
               <DialogDescription>
-                Update the item details below.
+                Update the room details below.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <FormField
                 control={form.control}
-                name="title"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Title <span className="text-destructive">*</span>
+                      Name <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="Title" type="text" {...field} />
+                      <Input placeholder="Room name" type="text" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -112,12 +115,21 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
 
               <FormField
                 control={form.control}
-                name="description"
+                name="max_number_of_people"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>
+                      Max number of people{" "}
+                      <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="Description" type="text" {...field} />
+                      <Input
+                        placeholder="2"
+                        type="number"
+                        min={1}
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -142,4 +154,4 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
   )
 }
 
-export default EditItem
+export default EditRoom

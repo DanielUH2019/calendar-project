@@ -1,11 +1,10 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Check, Copy } from "lucide-react"
 
-import type { ItemPublic } from "@/client"
+import type { RoomPublic } from "@/client"
 import { Button } from "@/components/ui/button"
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard"
-import { cn } from "@/lib/utils"
-import { ItemActionsMenu } from "./ItemActionsMenu"
+import { RoomActionsMenu } from "./RoomActionsMenu"
 
 function CopyId({ id }: { id: string }) {
   const [copiedText, copy] = useCopyToClipboard()
@@ -31,42 +30,32 @@ function CopyId({ id }: { id: string }) {
   )
 }
 
-export const columns: ColumnDef<ItemPublic>[] = [
+export const columns: ColumnDef<RoomPublic>[] = [
   {
     accessorKey: "id",
     header: "ID",
     cell: ({ row }) => <CopyId id={row.original.id} />,
   },
   {
-    accessorKey: "title",
-    header: "Title",
-    cell: ({ row }) => (
-      <span className="font-medium">{row.original.title}</span>
-    ),
+    accessorKey: "name",
+    header: "Name",
+    cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
   },
   {
-    accessorKey: "description",
-    header: "Description",
-    cell: ({ row }) => {
-      const description = row.original.description
-      return (
-        <span
-          className={cn(
-            "max-w-xs truncate block text-muted-foreground",
-            !description && "italic",
-          )}
-        >
-          {description || "No description"}
-        </span>
-      )
-    },
+    accessorKey: "max_number_of_people",
+    header: "Max people",
+    cell: ({ row }) => (
+      <span className="tabular-nums text-muted-foreground">
+        {row.original.max_number_of_people}
+      </span>
+    ),
   },
   {
     id: "actions",
     header: () => <span className="sr-only">Actions</span>,
     cell: ({ row }) => (
       <div className="flex justify-end">
-        <ItemActionsMenu item={row.original} />
+        <RoomActionsMenu room={row.original} />
       </div>
     ),
   },

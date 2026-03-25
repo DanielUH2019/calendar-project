@@ -5,7 +5,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
-import { type ItemCreate, ItemsService } from "@/client"
+import { type RoomCreate, RoomsService } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -31,13 +31,16 @@ import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
 const formSchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }),
-  description: z.string().optional(),
+  name: z.string().min(1, { message: "Name is required" }),
+  max_number_of_people: z
+    .number()
+    .int()
+    .min(1, { message: "Must be at least 1" }),
 })
 
 type FormData = z.infer<typeof formSchema>
 
-const AddItem = () => {
+const AddRoom = () => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -47,22 +50,22 @@ const AddItem = () => {
     mode: "onBlur",
     criteriaMode: "all",
     defaultValues: {
-      title: "",
-      description: "",
+      name: "",
+      max_number_of_people: 2,
     },
   })
 
   const mutation = useMutation({
-    mutationFn: (data: ItemCreate) =>
-      ItemsService.createItem({ requestBody: data }),
+    mutationFn: (data: RoomCreate) =>
+      RoomsService.createRoom({ requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("Item created successfully")
+      showSuccessToast("Room created successfully")
       form.reset()
       setIsOpen(false)
     },
     onError: handleError.bind(showErrorToast),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["items"] })
+      queryClient.invalidateQueries({ queryKey: ["rooms"] })
     },
   })
 
@@ -75,14 +78,14 @@ const AddItem = () => {
       <DialogTrigger asChild>
         <Button className="my-4">
           <Plus className="mr-2" />
-          Add Item
+          Add Room
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add Item</DialogTitle>
+          <DialogTitle>Add Room</DialogTitle>
           <DialogDescription>
-            Fill in the details to add a new item.
+            Fill in the details to add a new room.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -90,15 +93,15 @@ const AddItem = () => {
             <div className="grid gap-4 py-4">
               <FormField
                 control={form.control}
-                name="title"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Title <span className="text-destructive">*</span>
+                      Name <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Title"
+                        placeholder="Room name"
                         type="text"
                         {...field}
                         required
@@ -111,12 +114,21 @@ const AddItem = () => {
 
               <FormField
                 control={form.control}
-                name="description"
+                name="max_number_of_people"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>
+                      Max number of people{" "}
+                      <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="Description" type="text" {...field} />
+                      <Input
+                        placeholder="2"
+                        type="number"
+                        min={1}
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -141,4 +153,4 @@ const AddItem = () => {
   )
 }
 
-export default AddItem
+export default AddRoom

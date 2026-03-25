@@ -3,7 +3,7 @@ import { Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 
-import { ItemsService } from "@/client"
+import { RoomsService } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -19,31 +19,31 @@ import { LoadingButton } from "@/components/ui/loading-button"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
-interface DeleteItemProps {
+interface DeleteRoomProps {
   id: string
   onSuccess: () => void
 }
 
-const DeleteItem = ({ id, onSuccess }: DeleteItemProps) => {
+const DeleteRoom = ({ id, onSuccess }: DeleteRoomProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const { handleSubmit } = useForm()
 
-  const deleteItem = async (id: string) => {
-    await ItemsService.deleteItem({ id: id })
+  const deleteRoom = async (id: string) => {
+    await RoomsService.deleteRoom({ id: id })
   }
 
   const mutation = useMutation({
-    mutationFn: deleteItem,
+    mutationFn: deleteRoom,
     onSuccess: () => {
-      showSuccessToast("The item was deleted successfully")
+      showSuccessToast("The room was deleted successfully")
       setIsOpen(false)
       onSuccess()
     },
     onError: handleError.bind(showErrorToast),
     onSettled: () => {
-      queryClient.invalidateQueries()
+      queryClient.invalidateQueries({ queryKey: ["rooms"] })
     },
   })
 
@@ -59,14 +59,14 @@ const DeleteItem = ({ id, onSuccess }: DeleteItemProps) => {
         onClick={() => setIsOpen(true)}
       >
         <Trash2 />
-        Delete Item
+        Delete Room
       </DropdownMenuItem>
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
-            <DialogTitle>Delete Item</DialogTitle>
+            <DialogTitle>Delete Room</DialogTitle>
             <DialogDescription>
-              This item will be permanently deleted. Are you sure? You will not
+              This room will be permanently deleted. Are you sure? You will not
               be able to undo this action.
             </DialogDescription>
           </DialogHeader>
@@ -91,4 +91,4 @@ const DeleteItem = ({ id, onSuccess }: DeleteItemProps) => {
   )
 }
 
-export default DeleteItem
+export default DeleteRoom
