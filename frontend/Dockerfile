@@ -24,3 +24,9 @@ COPY --from=build-stage /app/frontend/dist/ /usr/share/nginx/html
 
 COPY ./frontend/nginx.conf /etc/nginx/conf.d/default.conf
 COPY ./frontend/nginx-backend-not-found.conf /etc/nginx/extra-conf.d/backend-not-found.conf
+
+COPY ./frontend/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Render sets $PORT; local Compose / Traefik typically use 80.
+CMD ["/docker-entrypoint.sh"]

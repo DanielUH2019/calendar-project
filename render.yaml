@@ -1,0 +1,68 @@
+# Render Blueprint (Infrastructure as Code)
+# https://render.com/docs/infrastructure-as-code
+#
+# Deploy: Dashboard → New → Blueprint → connect this repo → Deploy Blueprint.
+# Set secret env vars when prompted (FIRST_SUPERUSER, FIRST_SUPERUSER_PASSWORD, EMAILS_FROM_EMAIL).
+#
+# Default URLs (change names in this file and the three URLs below if you rename services):
+# - API:   https://calendar-project-api.onrender.com
+# - UI:    https://calendar-project-web.onrender.com
+
+databases:
+  - name: calendar-project-db
+    region: oregon
+    plan: free
+    postgresMajorVersion: "18"
+    databaseName: app
+
+services:
+  - type: web
+    name: calendar-project-api
+    runtime: docker
+    region: oregon
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    # Migrations + seed (same as compose prestart) then API. Uses DATABASE_URL from Postgres.
+    dockerCommand: bash -c 'python app/backend_pre_start.py && alembic upgrade head && python app/initial_data.py && exec fastapi run --host 0.0.0.0 --port ${PORT:-10000} --workers 4 app/main.py'
+    healthCheckPath: /api/v1/utils/health-check/
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PROJECT_NAME
+        value: Calendar Project
+      - key: FRONTEND_HOST
+        value: https://calendar-project-web.onrender.com
+      - key: BACKEND_CORS_ORIGINS
+        value: https://calendar-project-web.onrender.com
+      - key: DATABASE_URL
+        fromDatabase:
+          name: calendar-project-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FIRST_SUPERUSER
+        sync: false
+      - key: FIRST_SUPERUSER_PASSWORD
+        sync: false
+      - key: EMAILS_FROM_EMAIL
+        sync: false
+      - key: SMTP_HOST
+        value: ""
+      - key: SMTP_USER
+        value: ""
+      - key: SMTP_PASSWORD
+        value: ""
+
+  - type: web
+    name: calendar-project-web
+    runtime: docker
+    region: oregon
+    plan: free
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    envVars:
+      # Passed as a Docker build-arg (see Render Docker docs). Must match the API service URL.
+      - key: VITE_API_URL
+        value: https://calendar-project-api.onrender.com

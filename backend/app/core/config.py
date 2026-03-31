@@ -50,15 +50,25 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
-    POSTGRES_SERVER: str
+    # When set (e.g. Render Postgres internal URL), this takes precedence over POSTGRES_* fields.
+    DATABASE_URL: str | None = None
+    POSTGRES_SERVER: str = ""
     POSTGRES_PORT: int = 5432
-    POSTGRES_USER: str
+    POSTGRES_USER: str = ""
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
+        if self.DATABASE_URL:
+            url = str(self.DATABASE_URL).strip()
+            # Render (and others) use postgresql://; SQLAlchemy uses psycopg3 driver.
+            for prefix in ("postgresql://", "postgres://"):
+                if url.startswith(prefix):
+                    url = "postgresql+psycopg://" + url[len(prefix) :]
+                    break
+            return PostgresDsn(url)
         return PostgresDsn.build(
             scheme="postgresql+psycopg",
             username=self.POSTGRES_USER,
@@ -81,6 +91,16 @@ class Settings(BaseSettings):
     def _set_default_emails_from(self) -> Self:
         if not self.EMAILS_FROM_NAME:
             self.EMAILS_FROM_NAME = self.PROJECT_NAME
+        return self
+
+    @model_validator(mode="after")
+    def _require_postgres_or_database_url(self) -> Self:
+        if self.DATABASE_URL:
+            return self
+        if not self.POSTGRES_SERVER or not self.POSTGRES_USER:
+            raise ValueError(
+                "Set DATABASE_URL, or set POSTGRES_SERVER and POSTGRES_USER (and related DB fields)."
+            )
         return self
 
     EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
@@ -108,7 +128,8 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _enforce_non_default_secrets(self) -> Self:
         self._check_default_secret("SECRET_KEY", self.SECRET_KEY)
-        self._check_default_secret("POSTGRES_PASSWORD", self.POSTGRES_PASSWORD)
+        if not self.DATABASE_URL:
+            self._check_default_secret("POSTGRES_PASSWORD", self.POSTGRES_PASSWORD)
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )

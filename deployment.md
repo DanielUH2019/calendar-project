@@ -208,6 +208,46 @@ docker compose -f compose.yml up -d
 
 For production you wouldn't want to have the overrides in `compose.override.yml`, that's why we explicitly specify `compose.yml` as the file to use.
 
+## Render (Blueprint)
+
+You can deploy the full stack (FastAPI backend, Vite frontend, Render Postgres) to [Render](https://render.com/) using the [`render.yaml`](./render.yaml) [Blueprint](https://render.com/docs/infrastructure-as-code) at the repository root.
+
+### One-time setup
+
+1. Push this repository to GitHub, GitLab, or Bitbucket (Render connects to your Git provider).
+2. In the [Render Dashboard](https://dashboard.render.com/), click **New** → **Blueprint**.
+3. Connect the repository and select the branch to deploy (often `master` or `main`).
+4. Confirm the resources listed from `render.yaml` (database + two web services), then **Deploy Blueprint**.
+5. When prompted, set the secret environment variables marked `sync: false` in the Blueprint:
+   * `FIRST_SUPERUSER` — email for the initial superuser (same role as in `.env` locally).
+   * `FIRST_SUPERUSER_PASSWORD` — strong password for that user (not `changethis`).
+   * `EMAILS_FROM_EMAIL` — sender address for transactional email (required for password reset *if* you configure SMTP later).
+
+`SECRET_KEY` is generated automatically (`generateValue: true`). The backend receives Postgres via `DATABASE_URL` (internal connection string from the managed database).
+
+### Default URLs and renames
+
+The Blueprint uses these service names: `calendar-project-api`, `calendar-project-web`, and `calendar-project-db`. By default, the public API URL is `https://calendar-project-api.onrender.com` and the frontend is `https://calendar-project-web.onrender.com`.
+
+If you **rename** a web service in `render.yaml`, update:
+
+* `VITE_API_URL` on the frontend service so it matches the API’s public URL (see comments in `render.yaml`).
+* `FRONTEND_HOST` and `BACKEND_CORS_ORIGINS` on the backend so they match the frontend’s public URL.
+
+Render does not support variable interpolation inside `render.yaml`; keep those three values in sync manually (or adjust via the Render Dashboard).
+
+### After deploy
+
+* Frontend: open the `calendar-project-web` URL from the Dashboard.
+* API docs: `https://<your-api-service-name>.onrender.com/docs`
+* Health check: `GET /api/v1/utils/health-check/` (used as `healthCheckPath` for the API service).
+
+### Notes
+
+* The API container runs migrations and initial data seeding on startup (equivalent to the Compose `prestart` service). For heavy databases, consider moving migrations to a [pre-deploy command](https://render.com/docs/deploys#pre-deploy-command) later.
+* [Docker on Render](https://render.com/docs/docker) passes service environment variables as Docker build arguments; `VITE_API_URL` is therefore available during the frontend image build.
+* Free instances and free Postgres have [platform limits](https://render.com/docs/free); use paid plans for production traffic if needed.
+
 ## Continuous Deployment (CD)
 
 You can use GitHub Actions to deploy your project automatically. 😎

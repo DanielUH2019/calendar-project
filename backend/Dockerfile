@@ -42,4 +42,5 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 WORKDIR /app/backend/
 
-CMD ["fastapi", "run", "--workers", "4", "app/main.py"]
+# Bind to Render's $PORT when set; default 8000 for local/production Docker Compose.
+CMD ["sh", "-c", "exec fastapi run --host 0.0.0.0 --port ${PORT:-8000} --workers 4 app/main.py"]

@@ -216,7 +216,7 @@ Frontend docs: [frontend/README.md](./frontend/README.md).
 
 ## Deployment
 
-Deployment docs: [deployment.md](./deployment.md).
+Deployment docs: [deployment.md](./deployment.md) (Docker Compose + Traefik, and [Render Blueprint](./deployment.md#render-blueprint) via [`render.yaml`](./render.yaml)).
 
 ## Development
 
