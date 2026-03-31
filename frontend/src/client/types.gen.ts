@@ -29,6 +29,28 @@ export type PrivateUserCreate = {
     is_verified?: boolean;
 };
 
+export type ReservationCreate = {
+    room_id: string;
+    start_date: string;
+    end_date: string;
+};
+
+export type ReservationPublic = {
+    start_date: string;
+    end_date: string;
+    status?: string;
+    id: string;
+    room_id: string;
+    user_id: string;
+    created_at?: (string | null);
+    room_name?: (string | null);
+};
+
+export type ReservationsPublic = {
+    data: Array<ReservationPublic>;
+    count: number;
+};
+
 export type RoomCreate = {
     name: string;
     max_number_of_people: number;
@@ -144,6 +166,27 @@ export type PrivateCreateUserData = {
 };
 
 export type PrivateCreateUserResponse = (UserPublic);
+
+export type ReservationsReadAvailableRoomsData = {
+    endDate: string;
+    numberOfPeople: number;
+    startDate: string;
+};
+
+export type ReservationsReadAvailableRoomsResponse = (RoomsPublic);
+
+export type ReservationsReadReservationsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type ReservationsReadReservationsResponse = (ReservationsPublic);
+
+export type ReservationsCreateReservationData = {
+    requestBody: ReservationCreate;
+};
+
+export type ReservationsCreateReservationResponse = (ReservationPublic);
 
 export type RoomsReadRoomsData = {
     limit?: number;

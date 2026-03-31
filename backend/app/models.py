@@ -1,7 +1,7 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
-from pydantic import EmailStr
+from pydantic import EmailStr, model_validator
 from sqlalchemy import DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -54,6 +54,9 @@ class User(UserBase, table=True):
         sa_type=DateTime(timezone=True),  # type: ignore
     )
     rooms: list["Room"] = Relationship(back_populates="owner", cascade_delete=True)
+    reservations: list["Reservation"] = Relationship(
+        back_populates="user", cascade_delete=True
+    )
 
 
 # Properties to return via API, id is always required
@@ -92,6 +95,56 @@ class Room(RoomBase, table=True):
         foreign_key="user.id", nullable=False, ondelete="CASCADE"
     )
     owner: User | None = Relationship(back_populates="rooms")
+    reservations: list["Reservation"] = Relationship(
+        back_populates="room", cascade_delete=True
+    )
+
+
+class ReservationBase(SQLModel):
+    start_date: date
+    end_date: date
+    status: str = Field(default="active", max_length=20)
+
+
+class ReservationCreate(SQLModel):
+    room_id: uuid.UUID
+    start_date: date
+    end_date: date
+
+    @model_validator(mode="after")
+    def end_after_start(self) -> "ReservationCreate":
+        if self.end_date <= self.start_date:
+            raise ValueError("end_date must be after start_date")
+        return self
+
+
+class ReservationPublic(ReservationBase):
+    id: uuid.UUID
+    room_id: uuid.UUID
+    user_id: uuid.UUID
+    created_at: datetime | None = None
+    room_name: str | None = None
+
+
+class ReservationsPublic(SQLModel):
+    data: list[ReservationPublic]
+    count: int
+
+
+class Reservation(ReservationBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    room_id: uuid.UUID = Field(
+        foreign_key="room.id", nullable=False, ondelete="CASCADE"
+    )
+    user_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    room: Room | None = Relationship(back_populates="reservations")
+    user: User | None = Relationship(back_populates="reservations")
 
 
 class RoomPublic(RoomBase):

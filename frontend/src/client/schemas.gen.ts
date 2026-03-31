@@ -126,6 +126,110 @@ export const PrivateUserCreateSchema = {
     title: 'PrivateUserCreate'
 } as const;
 
+export const ReservationCreateSchema = {
+    properties: {
+        room_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Room Id'
+        },
+        start_date: {
+            type: 'string',
+            format: 'date',
+            title: 'Start Date'
+        },
+        end_date: {
+            type: 'string',
+            format: 'date',
+            title: 'End Date'
+        }
+    },
+    type: 'object',
+    required: ['room_id', 'start_date', 'end_date'],
+    title: 'ReservationCreate'
+} as const;
+
+export const ReservationPublicSchema = {
+    properties: {
+        start_date: {
+            type: 'string',
+            format: 'date',
+            title: 'Start Date'
+        },
+        end_date: {
+            type: 'string',
+            format: 'date',
+            title: 'End Date'
+        },
+        status: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Status',
+            default: 'active'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        room_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Room Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        },
+        room_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Room Name'
+        }
+    },
+    type: 'object',
+    required: ['start_date', 'end_date', 'id', 'room_id', 'user_id'],
+    title: 'ReservationPublic'
+} as const;
+
+export const ReservationsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ReservationPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ReservationsPublic'
+} as const;
+
 export const RoomCreateSchema = {
     properties: {
         name: {

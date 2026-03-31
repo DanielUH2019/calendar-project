@@ -4,7 +4,15 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Room, RoomCreate, User, UserCreate, UserUpdate
+from app.models import (
+    Reservation,
+    ReservationCreate,
+    Room,
+    RoomCreate,
+    User,
+    UserCreate,
+    UserUpdate,
+)
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -66,3 +74,15 @@ def create_room(*, session: Session, room_in: RoomCreate, owner_id: uuid.UUID) -
     session.commit()
     session.refresh(db_room)
     return db_room
+
+
+def create_reservation(
+    *, session: Session, reservation_in: ReservationCreate, user_id: uuid.UUID
+) -> Reservation:
+    db_reservation = Reservation.model_validate(
+        reservation_in.model_dump(), update={"user_id": user_id}
+    )
+    session.add(db_reservation)
+    session.commit()
+    session.refresh(db_reservation)
+    return db_reservation

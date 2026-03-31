@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, RoomsReadRoomsData, RoomsReadRoomsResponse, RoomsCreateRoomData, RoomsCreateRoomResponse, RoomsReadRoomData, RoomsReadRoomResponse, RoomsUpdateRoomData, RoomsUpdateRoomResponse, RoomsDeleteRoomData, RoomsDeleteRoomResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, ReservationsReadAvailableRoomsData, ReservationsReadAvailableRoomsResponse, ReservationsReadReservationsData, ReservationsReadReservationsResponse, ReservationsCreateReservationData, ReservationsCreateReservationResponse, RoomsReadRoomsData, RoomsReadRoomsResponse, RoomsCreateRoomData, RoomsCreateRoomResponse, RoomsReadRoomData, RoomsReadRoomResponse, RoomsUpdateRoomData, RoomsUpdateRoomResponse, RoomsDeleteRoomData, RoomsDeleteRoomResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class LoginService {
     /**
@@ -115,6 +115,78 @@ export class PrivateService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/private/users/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class ReservationsService {
+    /**
+     * Read Available Rooms
+     * Rooms that fit the party size and have no overlapping active reservation
+     * in [start_date, end_date) (half-open interval).
+     * @param data The data for the request.
+     * @param data.startDate
+     * @param data.endDate
+     * @param data.numberOfPeople
+     * @returns RoomsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readAvailableRooms(data: ReservationsReadAvailableRoomsData): CancelablePromise<ReservationsReadAvailableRoomsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/reservations/available-rooms',
+            query: {
+                start_date: data.startDate,
+                end_date: data.endDate,
+                number_of_people: data.numberOfPeople
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Reservations
+     * Reservations created by the current user, newest stays first.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns ReservationsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readReservations(data: ReservationsReadReservationsData = {}): CancelablePromise<ReservationsReadReservationsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/reservations/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Reservation
+     * Create a reservation for a room. Any authenticated user may do this for rooms
+     * they own; superusers may create reservations for any room.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns ReservationPublic Successful Response
+     * @throws ApiError
+     */
+    public static createReservation(data: ReservationsCreateReservationData): CancelablePromise<ReservationsCreateReservationResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/reservations/',
             body: data.requestBody,
             mediaType: 'application/json',
             errors: {

@@ -9,6 +9,7 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/useAuth"
+import { SidebarLogout } from "./Logout"
 import { type Item, Main } from "./Main"
 import { User } from "./User"
 
@@ -35,6 +36,7 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <SidebarAppearance />
+        <SidebarLogout />
         <User user={currentUser} />
       </SidebarFooter>
     </Sidebar>
