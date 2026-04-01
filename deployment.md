@@ -1,12 +1,11 @@
-# FastAPI Project - Deployment
+# Calendar Project — Deployment
 
-You can deploy the project using Docker Compose to a remote server.
+Two main paths:
 
-This project expects you to have a Traefik proxy handling communication to the outside world and HTTPS certificates.
+1. **Your own server** — Docker Compose behind **Traefik** (HTTPS, subdomains). Use the sections below from “Preparation” through “Deploy with Docker Compose”.
+2. **Render** — Managed Postgres + two Docker web services (API + static UI) via the Blueprint in [`render.yaml`](./render.yaml). Jump to **[Render (Blueprint)](#render-blueprint)**.
 
-You can use CI/CD (continuous integration and continuous deployment) systems to deploy automatically, there are already configurations to do it with GitHub Actions.
-
-But you have to configure a couple things first. 🤓
+You can also use CI/CD (e.g. GitHub Actions) to deploy automatically; this repo includes workflow examples. Configure secrets and domains first.
 
 ## Preparation
 
@@ -103,9 +102,9 @@ Now with the environment variables set and the `compose.traefik.yml` in place, y
 docker compose -f compose.traefik.yml up -d
 ```
 
-## Deploy the FastAPI Project
+## Deploy with Docker Compose (Traefik)
 
-Now that you have Traefik in place you can deploy your FastAPI project with Docker Compose.
+Now that you have Traefik in place you can deploy the Calendar Project stack with Docker Compose.
 
 **Note**: You might want to jump ahead to the section about Continuous Deployment with GitHub Actions.
 
@@ -210,7 +209,9 @@ For production you wouldn't want to have the overrides in `compose.override.yml`
 
 ## Render (Blueprint)
 
-You can deploy the full stack (FastAPI backend, Vite frontend, Render Postgres) to [Render](https://render.com/) using the [`render.yaml`](./render.yaml) [Blueprint](https://render.com/docs/infrastructure-as-code) at the repository root.
+You can deploy the full stack (FastAPI backend, Vite-built frontend, Render Postgres) to [Render](https://render.com/) using the [`render.yaml`](./render.yaml) [Blueprint](https://render.com/docs/infrastructure-as-code) at the repository root.
+
+**Environment alignment:** the backend needs `FRONTEND_HOST` and `BACKEND_CORS_ORIGINS` set to your **public frontend URL**. The frontend image must be built with `VITE_API_URL` pointing at your **public API URL** (Vite bakes this in at build time). `SECRET_KEY` is generated in the Blueprint; keep the three URLs in sync if you rename services—see comments in `render.yaml`.
 
 ### One-time setup
 

@@ -1,8 +1,15 @@
-# Render Blueprint (Infrastructure as Code)
+# Render Blueprint (Infrastructure as Code) — Calendar Project
 # https://render.com/docs/infrastructure-as-code
+#
+# Full narrative: see deployment.md in this repo ("Render (Blueprint)").
 #
 # Deploy: Dashboard → New → Blueprint → connect this repo → Deploy Blueprint.
 # Set secret env vars when prompted (FIRST_SUPERUSER, FIRST_SUPERUSER_PASSWORD, EMAILS_FROM_EMAIL).
+#
+# Keep in sync when you rename services or change public URLs:
+# - FRONTEND_HOST + BACKEND_CORS_ORIGINS (backend) = public frontend URL.
+# - VITE_API_URL (frontend build) = public API URL (baked in at image build time).
+# - SECRET_KEY is generated here (generateValue); do not leave it unset in production.
 #
 # Default URLs (change names in this file and the three URLs below if you rename services):
 # - API:   https://calendar-project-api.onrender.com

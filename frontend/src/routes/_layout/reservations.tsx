@@ -57,7 +57,7 @@ export const Route = createFileRoute("/_layout/reservations")({
   head: () => ({
     meta: [
       {
-        title: "Reservations - FastAPI Template",
+        title: "Reservations — Calendar Project",
       },
     ],
   }),

@@ -1,4 +1,6 @@
-# FastAPI Project - Development
+# Calendar Project — Development
+
+Local development guide for the **Calendar Project** (rooms, reservations, JWT auth). The stack uses Docker Compose with optional hybrid workflows (run the frontend or backend on the host while the rest stays in containers).
 
 ## Docker Compose
 
@@ -10,7 +12,7 @@ docker compose watch
 
 * Now you can open your browser and interact with these URLs:
 
-Frontend, built with Docker, with routes handled based on the path: <http://localhost:5173>
+Frontend (React app): <http://localhost:5173>
 
 Backend, JSON based web API based on OpenAPI: <http://localhost:8000>
 
